@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from non_local_block import NONLocalBlock2D
+from models.non_local_block import NONLocalBlock2D
 
 
 class NEDB(nn.Module):

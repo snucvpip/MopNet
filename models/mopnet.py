@@ -14,8 +14,8 @@ import torch.utils.model_zoo as model_zoo
 from collections import OrderedDict
 import torchvision.models as models
 from torch.autograd import Variable
-from NEDB import NEDB
-from RNEDB import RNEDB
+from models.NEDB import NEDB
+from models.RNEDB import RNEDB
 import numpy as np
 import cv2
 import os

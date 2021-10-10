@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# pre-trained model
+mopnet/
+classifier/
+test/
+
+# Mac OS
+.DS_Store
+.AppleDouble
+.LSOverride
