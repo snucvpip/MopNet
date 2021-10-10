@@ -62,7 +62,7 @@ path_class_geo = "./classifier/geo_epoch_95.pth"
 # device = torch.device("cuda:0")
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-opt.manualSeed = random.randint(1, 10000)
+opt.manualSeed = 0 # random.randint(1, 10000)
 random.seed(opt.manualSeed)
 torch.manual_seed(opt.manualSeed)
 torch.cuda.manual_seed_all(opt.manualSeed)
@@ -77,7 +77,7 @@ val_dataloader = getLoader(opt.dataset,
                        mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5),
                        split='test',
                        shuffle=False,
-                       seed=opt.manualSeed,
+                       seed=None, #opt.manualSeed,
                        pre=opt.pre)
 
 inputChannelSize = opt.inputChannelSize

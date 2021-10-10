@@ -8,6 +8,8 @@ mopnet/
 classifier/
 test/
 
+results/
+
 # Mac OS
 .DS_Store
 .AppleDouble
