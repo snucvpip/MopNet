@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from region_non_local_block import RegionNONLocalBlock
+from models.region_non_local_block import RegionNONLocalBlock
 
 
 class RNEDB(nn.Module):

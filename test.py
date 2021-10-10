@@ -59,9 +59,10 @@ print(opt)
 path_class_color = "./classifier/color_epoch_95.pth"
 path_class_geo = "./classifier/geo_epoch_95.pth"
 
-device = torch.device("cuda:0")
+# device = torch.device("cuda:0")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-opt.manualSeed = random.randint(1, 10000)
+opt.manualSeed = 0 # random.randint(1, 10000)
 random.seed(opt.manualSeed)
 torch.manual_seed(opt.manualSeed)
 torch.cuda.manual_seed_all(opt.manualSeed)
@@ -76,18 +77,18 @@ val_dataloader = getLoader(opt.dataset,
                        mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5),
                        split='test',
                        shuffle=False,
-                       seed=opt.manualSeed,
+                       seed=opt.manualSeed, #opt.manualSeed,
                        pre=opt.pre)
 
 inputChannelSize = opt.inputChannelSize
 outputChannelSize= opt.outputChannelSize
 
 netG=net.Single()
-netG.load_state_dict(torch.load(opt.netG))
+netG.load_state_dict(torch.load(opt.netG, map_location=device))
 netG.eval()
 netG.to(device)
 netEdge = net.EdgePredict()
-netEdge.load_state_dict(torch.load(opt.netE))
+netEdge.load_state_dict(torch.load(opt.netE, map_location=device))
 netEdge.eval()
 netEdge.to(device)
 print(netG)
@@ -98,11 +99,11 @@ target, input = target.to(device), input.to(device)
 
 # Classifiers
 net_label_color=net.vgg19ca()
-net_label_color.load_state_dict(torch.load(path_class_color))
+net_label_color.load_state_dict(torch.load(path_class_color, map_location=device))
 net_label_color=net_label_color.to(device)
 
 net_label_geo = net.vgg19ca_2()
-net_label_geo.load_state_dict(torch.load(path_class_geo))
+net_label_geo.load_state_dict(torch.load(path_class_geo, map_location=device))
 net_label_geo=net_label_geo.to(device)
 
 vcnt = 0
@@ -114,7 +115,7 @@ a = np.repeat(a, 3, axis=0)
 conv1=nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1, bias=False, groups=3)
 conv1.weight.data.copy_(torch.from_numpy(a))
 conv1.weight.requires_grad = False
-conv1.cuda()
+# conv1.cuda()
 
 b = np.array([[-1, -2, -1],[0, 0, 0],[1, 2, 1]], dtype=np.float32)
 b = b.reshape(1, 1, 3, 3)
@@ -122,7 +123,7 @@ b = np.repeat(b, 3, axis=0)
 conv2=nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1, bias=False, groups=3)
 conv2.weight.data.copy_(torch.from_numpy(b))
 conv2.weight.requires_grad = False
-conv2.cuda()
+# conv2.cuda()
 
 def gauss_kernel(kernlen=21, nsig=3, channels=1):
     interval = (2 * nsig + 1.) / (kernlen)
@@ -137,10 +138,10 @@ def gauss_kernel(kernlen=21, nsig=3, channels=1):
 
 # Gaussian blur
 g_kernel = gauss_kernel(3, 5, 1).transpose((3, 2, 1, 0))
-gauss_conv = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=3/2, bias=False)
+gauss_conv = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=3//2, bias=False)
 gauss_conv.weight.data.copy_(torch.from_numpy(g_kernel))
 gauss_conv.weight.requires_grad = False
-gauss_conv.cuda()
+# gauss_conv.cuda()
 
 
 for i, data in enumerate(val_dataloader, 0):
@@ -185,6 +186,10 @@ for i, data in enumerate(val_dataloader, 0):
     x_hat1 = netG(input, edge, labels)
     residual, x_hat = x_hat1
 
+    residual = (target - x_hat)
+    print(residual)
+    print(residual.sum())
+
     # Save results
     for j in range(x_hat.shape[0]):
         vcnt += 1
@@ -192,14 +197,17 @@ for i, data in enumerate(val_dataloader, 0):
         ti1 = x_hat[j, :,:,: ]
         tt1 = target[j, :,:,: ]
         ori = input[j, :, :, :]
+        res = residual[j, :, :, :]
         mi1 = cv2.cvtColor(utils.my_tensor2im(ti1), cv2.COLOR_BGR2RGB)
         mt1 = cv2.cvtColor(utils.my_tensor2im(tt1), cv2.COLOR_BGR2RGB)
         ori = cv2.cvtColor(utils.my_tensor2im(ori), cv2.COLOR_BGR2RGB)
+        res = cv2.cvtColor(utils.my_tensor2im(res), cv2.COLOR_BGR2RGB)
 
         if opt.write==1:
             cv2.imwrite(opt.image_path + os.sep + 'd'+os.sep+'d'+str(i)+'_'+str(j) +'_.png', mi1)
             cv2.imwrite(opt.image_path + os.sep+ 'o'+os.sep + 'o' + str(i)+'_'+str(j) + "_.png", ori)
             cv2.imwrite(opt.image_path + os.sep + 'g' + os.sep + 'g' + str(i) + '_' + str(j) + "_.png", mt1)
+            cv2.imwrite(opt.image_path + os.sep + 'd' + os.sep + 'r' + str(i) + '_' + str(j) + "_.png", res)
 
     print(50*'-')
     print(vcnt)

@@ -22,7 +22,7 @@ def weights_init(m):
 
 
 def getLoader(datasetName, dataroot, originalSize, imageSize, batchSize=64, workers=4,
-              mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5), split='train', shuffle=True, seed=None, pre="", label_file=""):
+              mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5), split='train', shuffle=True, seed=True, pre="", label_file=""):
   if datasetName == 'my_loader':
     from datasets.my_loader import my_loader as commonDataset
     import transforms.pix2pix as transforms
@@ -52,7 +52,7 @@ def getLoader(datasetName, dataroot, originalSize, imageSize, batchSize=64, work
 
   dataloader = torch.utils.data.DataLoader(dataset, 
                                            batch_size=batchSize, 
-                                           shuffle=shuffle, 
+                                           shuffle=shuffle,
                                            num_workers=int(workers))
   return dataloader
 
