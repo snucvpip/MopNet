@@ -188,6 +188,10 @@ for i, data in enumerate(val_dataloader, 0):
     x_hat1 = netG(input, edge, labels)
     residual, x_hat = x_hat1
 
+    residual = (target - x_hat)
+    print(residual)
+    print(residual.sum())
+
     # Save results
     for j in range(x_hat.shape[0]):
         vcnt += 1
@@ -195,14 +199,17 @@ for i, data in enumerate(val_dataloader, 0):
         ti1 = x_hat[j, :,:,: ]
         tt1 = target[j, :,:,: ]
         ori = input[j, :, :, :]
+        res = residual[j, :, :, :]
         mi1 = cv2.cvtColor(utils.my_tensor2im(ti1), cv2.COLOR_BGR2RGB)
         mt1 = cv2.cvtColor(utils.my_tensor2im(tt1), cv2.COLOR_BGR2RGB)
         ori = cv2.cvtColor(utils.my_tensor2im(ori), cv2.COLOR_BGR2RGB)
+        res = cv2.cvtColor(utils.my_tensor2im(res), cv2.COLOR_BGR2RGB)
 
         if opt.write==1:
             cv2.imwrite(opt.image_path + os.sep + 'd'+os.sep+'d'+str(i)+'_'+str(j) +'_.png', mi1)
             cv2.imwrite(opt.image_path + os.sep+ 'o'+os.sep + 'o' + str(i)+'_'+str(j) + "_.png", ori)
             cv2.imwrite(opt.image_path + os.sep + 'g' + os.sep + 'g' + str(i) + '_' + str(j) + "_.png", mt1)
+            cv2.imwrite(opt.image_path + os.sep + 'd' + os.sep + 'r' + str(i) + '_' + str(j) + "_.png", res)
 
     print(50*'-')
     print(vcnt)
