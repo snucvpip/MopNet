@@ -96,8 +96,7 @@ target = torch.FloatTensor(opt.batchSize, outputChannelSize, opt.imageSize, opt.
 input = torch.FloatTensor(opt.batchSize, inputChannelSize, opt.imageSize, opt.imageSize)
 target, input = target.to(device), input.to(device)
 
-print(np.count_nonzero(target))
-quit()
+
 
 # Classifiers
 net_label_color=net.vgg19ca()
